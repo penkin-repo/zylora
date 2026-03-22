@@ -8,6 +8,13 @@ interface Props {
   onEngineChange?: (key: string) => void;
 }
 
+function EngineIcon({ icon, name }: { icon: string; name?: string }) {
+  if (icon.endsWith('.svg')) {
+    return <img src={icon} alt={name || "icon"} className="w-[75%] h-[75%] object-contain" />;
+  }
+  return <>{icon}</>;
+}
+
 export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
   const [query, setQuery] = useState("");
   const defaultEngine = searchEngines.find((e) => e.key === activeEngineKey) ?? searchEngines[0];
@@ -73,7 +80,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
               className="w-4 h-4 rounded flex items-center justify-center text-white text-[9px] font-bold"
               style={{ background: activeEngine.color }}
             >
-              {activeEngine.icon}
+              <EngineIcon icon={activeEngine.icon} name={activeEngine.name} />
             </span>
             <svg className="w-2.5 h-2.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -101,7 +108,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
                     className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white"
                     style={{ background: engine.color }}
                   >
-                    {engine.icon}
+                    <EngineIcon icon={engine.icon} name={engine.name} />
                   </span>
                   {engine.name}
                   {activeEngine.key === engine.key && (
@@ -154,7 +161,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
               }`}
               style={{ background: engine.color }}
             >
-              {engine.icon}
+              <EngineIcon icon={engine.icon} name={engine.name} />
             </button>
           ))}
         </div>
@@ -177,7 +184,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
               className="w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
               style={{ background: activeEngine.color }}
             >
-              {activeEngine.icon}
+              <EngineIcon icon={activeEngine.icon} name={activeEngine.name} />
             </span>
             <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -201,7 +208,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
                     className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                     style={{ background: engine.color }}
                   >
-                    {engine.icon}
+                    <EngineIcon icon={engine.icon} name={engine.name} />
                   </span>
                   <span>{engine.name}</span>
                 </button>
@@ -246,7 +253,7 @@ export function SearchBar({ compact, activeEngineKey, onEngineChange }: Props) {
               className="w-3.5 h-3.5 rounded-sm inline-flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
               style={{ background: engine.color }}
             >
-              {engine.icon}
+              <EngineIcon icon={engine.icon} name={engine.name} />
             </span>
             {engine.name}
           </button>

@@ -36,6 +36,7 @@ function SortableGroupCard({
   onUpdateBookmark,
   onAddBookmark,
   onRemoveGroup,
+  onUpdateGroup,
 }: {
   group: BookmarkGroupType;
   editMode: boolean;
@@ -43,6 +44,7 @@ function SortableGroupCard({
   onUpdateBookmark: (bid: string, data: Partial<Omit<BookmarkGroupType["bookmarks"][0], "id">>) => void;
   onAddBookmark: (b: Omit<BookmarkGroupType["bookmarks"][0], "id">) => void;
   onRemoveGroup: () => void;
+  onUpdateGroup: (data: Partial<Pick<BookmarkGroupType, "title" | "emoji" | "color">>) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: group.id, disabled: !editMode });
@@ -85,6 +87,7 @@ function SortableGroupCard({
         onUpdateBookmark={onUpdateBookmark}
         onAddBookmark={onAddBookmark}
         onRemoveGroup={onRemoveGroup}
+        onUpdateGroup={onUpdateGroup}
       />
     </div>
   );
@@ -112,7 +115,7 @@ function LoadingScreen() {
 
 /* ── App (authenticated) ─────────────────────────────────────── */
 function AppContent({ user, logout }: Pick<AuthState, "user" | "logout">) {
-  const { groups, ready, addBookmark, updateBookmark, removeBookmark, addGroup, removeGroup, reorderGroups } =
+  const { groups, ready, addBookmark, updateBookmark, removeBookmark, addGroup, removeGroup, reorderGroups, updateGroup } =
     useFirestoreBookmarks(user!);
 
   // syncing = true until first server-confirmed snapshot arrives (cache shown before this)
@@ -288,6 +291,7 @@ function AppContent({ user, logout }: Pick<AuthState, "user" | "logout">) {
                   onUpdateBookmark={(bid, data) => updateBookmark(group.id, bid, data)}
                   onAddBookmark={(b) => addBookmark(group.id, b)}
                   onRemoveGroup={() => removeGroup(group.id)}
+                  onUpdateGroup={(data) => updateGroup(group.id, data)}
                 />
               ))}
 

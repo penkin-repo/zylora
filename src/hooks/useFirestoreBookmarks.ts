@@ -227,6 +227,15 @@ export function useFirestoreBookmarks(user: { uid: string }) {
     [user.uid, groups, syncToCacheAndState]
   );
 
+  const updateGroup = useCallback(
+    async (groupId: string, data: Partial<Pick<BookmarkGroup, "title" | "emoji" | "color">>) => {
+      const newGroups = groups.map((g) => (g.id === groupId ? { ...g, ...data } : g));
+      syncToCacheAndState(newGroups);
+      await updateDoc(groupRef(user.uid, groupId), data);
+    },
+    [user.uid, groups, syncToCacheAndState]
+  );
+
   const removeGroup = useCallback(
     async (groupId: string) => {
       // Optimistic update
@@ -259,6 +268,7 @@ export function useFirestoreBookmarks(user: { uid: string }) {
     updateBookmark,
     removeBookmark,
     addGroup,
+    updateGroup,
     removeGroup,
     reorderGroups,
   };

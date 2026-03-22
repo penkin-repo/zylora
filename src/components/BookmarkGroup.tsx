@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookmarkGroup as BookmarkGroupType, Bookmark } from "../types";
 import { BookmarkIcon } from "./BookmarkIcon";
 
@@ -9,6 +9,7 @@ interface Props {
   onUpdateBookmark: (bookmarkId: string, data: Partial<Omit<Bookmark, "id">>) => void;
   onAddBookmark: (bookmark: Omit<Bookmark, "id">) => void;
   onRemoveGroup: () => void;
+  onUpdateGroup: (data: Partial<Pick<BookmarkGroupType, "title" | "emoji" | "color">>) => void;
 }
 
 function getFaviconUrl(url: string) {
@@ -27,12 +28,25 @@ export function BookmarkGroup({
   onUpdateBookmark,
   onAddBookmark,
   onRemoveGroup,
+  onUpdateGroup,
 }: Props) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: "", url: "", emoji: "", color: group.color });
   const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
   const [faviconError, setFaviconError] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  
+  const [editTitle, setEditTitle] = useState(group.title);
+  const [editEmoji, setEditEmoji] = useState(group.emoji);
+
+  useEffect(() => { setEditTitle(group.title); }, [group.title]);
+  useEffect(() => { setEditEmoji(group.emoji); }, [group.emoji]);
+
+  const handleGroupUpdate = () => {
+    if (editTitle !== group.title || editEmoji !== group.emoji) {
+      onUpdateGroup({ title: editTitle, emoji: editEmoji });
+    }
+  };
 
   const handleUrlChange = (val: string) => {
     setForm((f) => ({ ...f, url: val }));
@@ -71,19 +85,39 @@ export function BookmarkGroup({
       {/* Group header */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-1.5 h-5 rounded-full" style={{ background: group.color }} />
-        <button
-          onClick={() => setCollapsed((v) => !v)}
-          className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest"
-        >
-          <span>{group.emoji}</span>
-          <span>{group.title}</span>
-          <svg
-            className={`w-3 h-3 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        {editMode ? (
+          <div className="flex items-center gap-1 flex-1 min-w-0 mr-2">
+            <input 
+              value={editEmoji}
+              onChange={(e) => setEditEmoji(e.target.value)}
+              onBlur={handleGroupUpdate}
+              onKeyDown={(e) => e.key === 'Enter' && handleGroupUpdate()}
+              className="bg-white/10 hover:bg-white/20 focus:bg-white/20 w-7 text-center rounded outline-none text-xs transition-colors py-0.5" 
+              maxLength={2}
+            />
+            <input 
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={handleGroupUpdate}
+              onKeyDown={(e) => e.key === 'Enter' && handleGroupUpdate()}
+              className="bg-white/10 hover:bg-white/20 focus:bg-white/20 flex-1 rounded outline-none font-semibold uppercase tracking-widest text-xs transition-colors py-0.5 px-2 min-w-0" 
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => setCollapsed((v) => !v)}
+            className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest text-left"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+            <span>{group.emoji}</span>
+            <span>{group.title}</span>
+            <svg
+              className={`w-3 h-3 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        )}
 
         {editMode && (
           <button

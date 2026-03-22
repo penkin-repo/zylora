@@ -1,6 +1,15 @@
 import { useRef } from "react";
 import { AppSettings } from "../hooks/useSettings";
 import { searchEngines } from "../data/searchEngines";
+// @ts-ignore
+import packageJson from "../../package.json";
+
+function EngineIcon({ icon, name }: { icon: string; name?: string }) {
+  if (icon.endsWith('.svg')) {
+    return <img src={icon} alt={name || "icon"} className="w-[75%] h-[75%] object-contain" />;
+  }
+  return <>{icon}</>;
+}
 
 export const BACKGROUNDS = [
   {
@@ -169,7 +178,7 @@ export function SettingsPanel({ settings, onSave, onClose }: Props) {
                     className="w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
                     style={{ background: engine.color }}
                   >
-                    {engine.icon}
+                    <EngineIcon icon={engine.icon} name={engine.name} />
                   </span>
                   <span className="text-sm font-medium">{engine.name}</span>
                   {isActive && (
@@ -183,8 +192,8 @@ export function SettingsPanel({ settings, onSave, onClose }: Props) {
           </div>
         </section>
 
-        <p className="text-white/20 text-xs text-center mt-auto pt-5">
-          Zylora · Настройки сохраняются в браузере
+        <p className="text-white/20 text-xs text-center mt-auto pt-5 pb-2">
+          Zylora v{packageJson.version} · Настройки сохраняются в браузере
         </p>
       </div>
     </>
