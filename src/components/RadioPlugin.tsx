@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 interface RadioPluginProps {
   url: string;
@@ -7,40 +7,58 @@ interface RadioPluginProps {
   onRemove?: () => void;
 }
 
+const isExt = typeof chrome !== 'undefined' && !!chrome.runtime?.sendMessage;
+
 export function RadioPlugin({ url, title, editMode, onRemove }: RadioPluginProps) {
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(url);
-      audioRef.current.volume = volume;
-      audioRef.current.muted = muted;
-      
-      audioRef.current.onended = () => setPlaying(false);
-      audioRef.current.onpause = () => setPlaying(false);
-      audioRef.current.onplay = () => setPlaying(true);
-    }
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
+    if (!isExt) return;
+
+    // Ask background service worker for current state
+    chrome.runtime.sendMessage({ type: 'RADIO_COMMAND', payload: { action: 'getState' } });
+
+    const listener = (msg: any) => {
+      if (msg.type === 'RADIO_STATE') {
+        if (msg.url === url) {
+           setPlaying(msg.playing);
+           if (msg.volume !== undefined) setVolume(msg.volume);
+           if (msg.muted !== undefined) setMuted(msg.muted);
+        } else {
+           setPlaying(false);
+        }
+      }
     };
-  }, [url]); // recreated if URL changes
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.muted = muted;
+    chrome.runtime.onMessage.addListener(listener);
+    return () => chrome.runtime.onMessage.removeListener(listener);
+  }, [url]);
+
+  const handleVolumeChange = (newVol: number) => {
+    setVolume(newVol);
+    setMuted(false);
+    if (isExt && playing) {
+      chrome.runtime.sendMessage({ type: 'RADIO_COMMAND', payload: { action: 'setVolume', volume: newVol, muted: false } });
     }
-  }, [volume, muted]);
+  };
 
-  const toggle = () => {
-    if (playing) {
-      audioRef.current?.pause();
-    } else {
-      audioRef.current?.play().catch(console.error);
+  const handleMuteToggle = () => {
+    const nextMuted = !muted;
+    setMuted(nextMuted);
+    if (isExt && playing) {
+      chrome.runtime.sendMessage({ type: 'RADIO_COMMAND', payload: { action: 'setVolume', volume, muted: nextMuted } });
+    }
+  };
+
+  const togglePlay = () => {
+    if (isExt) {
+       if (playing) {
+          chrome.runtime.sendMessage({ type: 'RADIO_COMMAND', payload: { action: 'pause' } });
+       } else {
+          chrome.runtime.sendMessage({ type: 'RADIO_COMMAND', payload: { action: 'play', url, volume, muted } });
+       }
     }
   };
 
@@ -60,7 +78,7 @@ export function RadioPlugin({ url, title, editMode, onRemove }: RadioPluginProps
       )}
       <button 
         onPointerDown={(e) => e.stopPropagation()} 
-        onClick={toggle} 
+        onClick={togglePlay} 
         className="w-8 h-8 rounded-full bg-white text-gray-900 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
       >
         {playing ? (
@@ -81,7 +99,7 @@ export function RadioPlugin({ url, title, editMode, onRemove }: RadioPluginProps
         onPointerDown={(e) => e.stopPropagation()} 
       >
         <button 
-          onClick={() => setMuted(!muted)} 
+          onClick={handleMuteToggle} 
           className="text-white/40 hover:text-white/80 transition-colors"
           title={muted ? "Включить звук" : "Выключить звук"}
         >
@@ -92,10 +110,7 @@ export function RadioPlugin({ url, title, editMode, onRemove }: RadioPluginProps
              type="range" 
              min="0" max="1" step="0.05" 
              value={muted ? 0 : volume} 
-             onChange={(e) => {
-               setVolume(parseFloat(e.target.value));
-               if (muted) setMuted(false);
-             }} 
+             onChange={(e) => handleVolumeChange(parseFloat(e.target.value))} 
              className="w-full appearance-none bg-white/10 h-1.5 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:bg-violet-400 [&::-webkit-slider-thumb]:transition-colors" 
            />
         </div>
