@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { AppSettings } from "../hooks/useSettings";
 import { searchEngines } from "../data/searchEngines";
 // @ts-ignore
@@ -52,6 +52,12 @@ interface Props {
 
 export function SettingsPanel({ settings, onSave, onClose }: Props) {
   const colorRef = useRef<HTMLInputElement>(null);
+
+  const [pluginMode, setPluginMode] = useState<'radio' | 'weather' | null>(null);
+  const [radioTitle, setRadioTitle] = useState("");
+  const [radioUrl, setRadioUrl] = useState("");
+  const [weatherCity, setWeatherCity] = useState("Москва");
+  const [weatherDays, setWeatherDays] = useState(3);
 
   return (
     <>
@@ -194,35 +200,96 @@ export function SettingsPanel({ settings, onSave, onClose }: Props) {
 
         {/* ── Plugins section ────────────────── */}
         <section>
-          <h3 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3 mt-6">
-            🧩 Плагины (Виджеты)
-          </h3>
-          <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/[0.07] transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="text-xl">📻</span>
-              <div>
-                <p className="text-sm font-medium text-white">Slam! Light</p>
-                <p className="text-xs text-white/40">Интернет-радио</p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                const hasRadio = settings.plugins?.find(p => p.type === 'radio');
-                if (hasRadio) {
-                  onSave({ plugins: settings.plugins.filter(p => p.type !== 'radio') });
-                } else {
-                  onSave({ plugins: [...(settings.plugins || []), { id: crypto.randomUUID(), type: 'radio', title: 'Slam! Light', config: { url: 'https://radio.slamfm.ru:8443/light' } }] });
-                }
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                settings.plugins?.find(p => p.type === 'radio') 
-                  ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' 
-                  : 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20'
-              }`}
-            >
-              {settings.plugins?.find(p => p.type === 'radio') ? 'Отключить' : 'Включить'}
-            </button>
+          <div className="flex items-center justify-between mb-3 mt-6">
+            <h3 className="text-white/60 text-xs font-semibold uppercase tracking-widest">
+              🧩 Плагины (Виджеты)
+            </h3>
+            <span className="text-xs text-white/40">{settings.plugins?.length || 0} активных</span>
           </div>
+
+          {/* Active plugins list */}
+          <div className="space-y-2 mb-3">
+            {settings.plugins?.map((p) => (
+              <div key={p.id} className="flex items-center justify-between px-3 py-2 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <span className="text-lg">{p.type === 'radio' ? '📻' : '⛅'}</span>
+                  <div className="truncate min-w-0">
+                    <p className="text-xs font-medium text-white truncate">{p.title || (p.type === 'weather' ? p.config?.city : 'Виджет')}</p>
+                    <p className="text-[10px] text-white/40 truncate">{p.type === 'radio' ? p.config?.url : `Прогноз на ${p.config?.days} дн.`}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => onSave({ plugins: settings.plugins.filter((x) => x.id !== p.id) })}
+                  className="text-white/20 hover:text-red-400 transition-colors px-2 py-1 flex-shrink-0"
+                  title="Удалить"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Add Plugin UI */}
+          {!pluginMode ? (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button
+                onClick={() => setPluginMode('radio')}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-xs font-medium"
+              >
+                + 📻 Радио
+              </button>
+              <button
+                onClick={() => setPluginMode('weather')}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-xs font-medium"
+              >
+                + ⛅ Погода
+              </button>
+            </div>
+          ) : (
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-3 mt-2">
+              <div className="flex justify-between items-center mb-1">
+                 <span className="text-xs font-semibold text-white/80">{pluginMode === 'radio' ? '📻 Новое Радио' : '⛅ Погода (Meteo)'}</span>
+                 <button onClick={() => setPluginMode(null)} className="text-white/40 hover:text-white text-xs">✕ Отмена</button>
+              </div>
+
+              {pluginMode === 'radio' && (
+                <>
+                  <input type="text" placeholder="Назв. (напр. SlamFM)" value={radioTitle} onChange={e => setRadioTitle(e.target.value)} className="w-full bg-white/10 border border-white/10 text-white text-xs px-3 py-2 rounded-lg outline-none focus:border-violet-500" />
+                  <input type="text" placeholder="URL потока (https://...)" value={radioUrl} onChange={e => setRadioUrl(e.target.value)} className="w-full bg-white/10 border border-white/10 text-white text-xs px-3 py-2 rounded-lg outline-none focus:border-violet-500" />
+                  <button 
+                    disabled={!radioUrl}
+                    onClick={() => {
+                       onSave({ plugins: [...(settings.plugins || []), { id: crypto.randomUUID(), type: 'radio', title: radioTitle || 'Радио', config: { url: radioUrl } }] });
+                       setPluginMode(null); setRadioTitle(''); setRadioUrl('');
+                    }}
+                    className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded-lg transition-colors"
+                  >
+                    Добавить виджет
+                  </button>
+                </>
+              )}
+
+              {pluginMode === 'weather' && (
+                <>
+                  <input type="text" placeholder="Город (напр. Москва)" value={weatherCity} onChange={e => setWeatherCity(e.target.value)} className="w-full bg-white/10 border border-white/10 text-white text-xs px-3 py-2 rounded-lg outline-none focus:border-violet-500" />
+                  <div className="flex items-center justify-between text-xs text-white/60">
+                    <span>Дней прогноза: {weatherDays}</span>
+                    <input type="range" min="1" max="7" value={weatherDays} onChange={e => setWeatherDays(parseInt(e.target.value))} className="w-24 accent-violet-500" />
+                  </div>
+                  <button 
+                    disabled={!weatherCity}
+                    onClick={() => {
+                       onSave({ plugins: [...(settings.plugins || []), { id: crypto.randomUUID(), type: 'weather', config: { city: weatherCity, days: weatherDays } }] });
+                       setPluginMode(null); setWeatherCity('Москва');
+                    }}
+                    className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded-lg transition-colors"
+                  >
+                    Добавить виджет
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </section>
 
         <p className="text-white/20 text-xs text-center mt-auto pt-5 pb-2">

@@ -2,6 +2,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { SortableContext, horizontalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RadioPlugin } from "./RadioPlugin";
+import { WeatherPlugin } from "./WeatherPlugin";
 import { AppPlugin } from "../hooks/useSettings";
 
 function SortablePluginWrapper({ id, plugin, editMode, onRemove }: any) {
@@ -11,6 +12,7 @@ function SortablePluginWrapper({ id, plugin, editMode, onRemove }: any) {
   return (
     <div ref={setNodeRef} style={style} className={`relative flex-shrink-0 flex items-center ${editMode ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-white/20 rounded-2xl" : ""}`} {...attributes} {...listeners}>
       {plugin.type === 'radio' && <RadioPlugin url={plugin.config?.url} title={plugin.title} editMode={editMode} onRemove={onRemove} />}
+      {plugin.type === 'weather' && <WeatherPlugin city={plugin.config?.city} days={plugin.config?.days} editMode={editMode} onRemove={onRemove} />}
     </div>
   );
 }
