@@ -149,7 +149,12 @@ export function useAuth(): AuthState {
     try {
       if (IS_CHROME_EXT) {
         // Chrome: fast, no popup, uses Chrome's built-in OAuth
-        await signInViaChrome();
+        try {
+          await signInViaChrome();
+        } catch (chromeErr) {
+          console.warn("[Zylora] Native Chrome Auth failed (e.g., Vivaldi, Brave or guest mode). Falling back to GitHub Proxy:", chromeErr);
+          await signInViaExternalProxy();
+        }
       } else if (IS_EDGE_EXT || IS_ANY_EXT) {
         // Edge/Firefox: universal GitHub Proxy approach
         await signInViaExternalProxy();
