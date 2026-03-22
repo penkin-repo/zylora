@@ -192,6 +192,39 @@ export function SettingsPanel({ settings, onSave, onClose }: Props) {
           </div>
         </section>
 
+        {/* ── Plugins section ────────────────── */}
+        <section>
+          <h3 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3 mt-6">
+            🧩 Плагины (Виджеты)
+          </h3>
+          <div className="flex items-center justify-between px-3 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/[0.07] transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📻</span>
+              <div>
+                <p className="text-sm font-medium text-white">Slam! Light</p>
+                <p className="text-xs text-white/40">Интернет-радио</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const hasRadio = settings.plugins?.find(p => p.type === 'radio');
+                if (hasRadio) {
+                  onSave({ plugins: settings.plugins.filter(p => p.type !== 'radio') });
+                } else {
+                  onSave({ plugins: [...(settings.plugins || []), { id: crypto.randomUUID(), type: 'radio', title: 'Slam! Light', config: { url: 'https://radio.slamfm.ru:8443/light' } }] });
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                settings.plugins?.find(p => p.type === 'radio') 
+                  ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' 
+                  : 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20'
+              }`}
+            >
+              {settings.plugins?.find(p => p.type === 'radio') ? 'Отключить' : 'Включить'}
+            </button>
+          </div>
+        </section>
+
         <p className="text-white/20 text-xs text-center mt-auto pt-5 pb-2">
           Zylora v{packageJson.version} · Настройки сохраняются в браузере
         </p>

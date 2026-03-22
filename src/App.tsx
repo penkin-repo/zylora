@@ -27,6 +27,7 @@ import { useAuth, AuthState } from "./hooks/useAuth";
 import { useFirestoreBookmarks } from "./hooks/useFirestoreBookmarks";
 import { useSettings } from "./hooks/useSettings";
 import { BookmarkGroup as BookmarkGroupType } from "./types";
+import { PluginBar } from "./components/PluginBar";
 
 /* ── Sortable group card ─────────────────────────────────────── */
 function SortableGroupCard({
@@ -324,6 +325,13 @@ function AppContent({ user, logout }: Pick<AuthState, "user" | "logout">) {
           </DragOverlay>
         </DndContext>
       </div>
+
+      {/* ── PLUGIN AREA (Constructor) ─────────────────────────────────── */}
+      <PluginBar 
+        plugins={settings.plugins || []} 
+        setPlugins={(plugins) => setSettings({ plugins })} 
+        editMode={editMode} 
+      />
 
       {/* Modals */}
       {showAddGroup && (

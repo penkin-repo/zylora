@@ -5,16 +5,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+export interface AppPlugin {
+  id: string;
+  type: "radio" | "weather" | "other";
+  title?: string;
+  config?: Record<string, any>;
+}
+
 export interface AppSettings {
   bgIndex: number;      // index into BACKGROUNDS array
   bgCustom: string;     // custom CSS gradient/color string, or ""
   searchEngine: string; // key of active search engine
+  plugins: AppPlugin[]; // user active plugins
 }
 
 const DEFAULTS: AppSettings = {
   bgIndex: 0,
   bgCustom: "",
   searchEngine: "google",
+  plugins: [],
 };
 
 const STORAGE_KEY = "zylora_settings";
