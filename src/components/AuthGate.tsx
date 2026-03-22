@@ -75,9 +75,7 @@ export function AuthGate({ onSignIn, loading = false }: Props) {
 
         {/* Logo */}
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-            <span className="text-white text-3xl font-bold">Z</span>
-          </div>
+          <img src="/favicon.svg" alt="Zylora Logo" className="w-20 h-20 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300" />
           <div className="text-center">
             <h1 className="text-white text-2xl font-bold tracking-tight">Zylora</h1>
             <p className="text-white/40 text-sm mt-1">Твоя стартовая страница</p>

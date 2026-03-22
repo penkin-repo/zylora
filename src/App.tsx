@@ -104,10 +104,8 @@ function LoadingScreen() {
       }}
     >
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
-          <span className="text-white text-xl font-bold">Z</span>
-        </div>
-        <div className="w-6 h-6 border-2 border-violet-400/40 border-t-violet-400 rounded-full animate-spin" />
+        <img src="/favicon.svg" alt="Zylora" className="w-12 h-12 object-contain drop-shadow-2xl animate-pulse" />
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mt-2" />
       </div>
     </div>
   );
@@ -191,9 +189,7 @@ function AppContent({ user, logout }: Pick<AuthState, "user" | "logout">) {
       <div className="fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-2 bg-black/20 backdrop-blur-md border-b border-white/[0.07]">
         {/* Logo */}
         <div className="flex items-center gap-1.5 mr-1 flex-shrink-0">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white text-[10px] font-bold">Z</span>
-          </div>
+          <img src="/favicon.svg" alt="Zylora" className="w-6 h-6 object-contain drop-shadow-md" />
           <span className="text-white/50 text-xs font-medium hidden sm:block">Zylora</span>
           {/* Sync indicator — pulses while awaiting server confirmation */}
           {isSyncing && (
