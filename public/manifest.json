@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Zylora",
+  "version": "1.0.0",
+  "description": "Твоя персональная стартовая страница. Закладки, поиск и часы — синхронизированные через Google.",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["identity", "storage"],
+  "oauth2": {
+    "client_id": "1005813307713-5o3fautaki49krkjb0hv7tm82khccdtm.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  },
+  "host_permissions": [
+    "https://*.googleapis.com/*",
+    "https://*.firebaseio.com/*",
+    "https://*.firebasestorage.googleapis.com/*",
+    "https://identitytoolkit.googleapis.com/*",
+    "https://securetoken.googleapis.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:;"
+  }
+}
