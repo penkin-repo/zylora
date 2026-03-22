@@ -3,5 +3,8 @@ dist/
 .DS_Store
 .env
 .env.*
+MASTER_PROMPT.md
+PROJECT_LOG.md
+PROJECT_LOG_HOW.md
 !.env.example
 *.log

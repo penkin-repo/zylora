@@ -78,8 +78,8 @@ function signInViaExternalProxy(): Promise<void> {
     }
     const extId = chrome.runtime.id;
     
-    // Страница Github Pages (настроено для github.com/penkin-repo/zylora)
-    const PROXY_URL = `https://penkin-repo.github.io/zylora/docs/index.html?extId=${extId}`;
+    // Страница Github Pages (когда вы выбираете папку /docs в настройках, GitHub выводит её в корень домена)
+    const PROXY_URL = `https://penkin-repo.github.io/zylora/index.html?extId=${extId}`;
     
     const tokenListener = async (message: any, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
       if (message && message.type === "AUTH_SUCCESS") {
