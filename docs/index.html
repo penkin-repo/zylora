@@ -100,37 +100,54 @@
             const auth = getAuth(app);
             const provider = new GoogleAuthProvider();
 
-            statusEl.textContent = '🔒 Ожидание входа через Google...';
+            statusEl.innerHTML = '';
+            const btn = document.createElement('button');
+            btn.textContent = '🔑 Войти через Google';
+            btn.style.cssText = 'padding: 12px 24px; border-radius: 8px; border: none; background: #a78bfa; color: #1e1b4b; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4);';
+            btn.onmouseover = () => btn.style.transform = 'scale(1.05)';
+            btn.onmouseout = () => btn.style.transform = 'scale(1)';
+            statusEl.appendChild(btn);
 
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const credential = GoogleAuthProvider.credentialFromResult(result);
+            btn.onclick = () => {
+                btn.textContent = 'Ожидание...';
+                btn.style.opacity = '0.7';
+                btn.style.pointerEvents = 'none';
 
-                    statusEl.textContent = '✅ Авторизация успешна! Отправка ключа в расширение...';
-
-                    // Отправляем токен обратно в расширение (по его уникальному ID)
-                    try {
-                        chrome.runtime.sendMessage(extId, {
-                            type: "AUTH_SUCCESS",
-                            idToken: credential.idToken,
-                            accessToken: credential.accessToken
-                        }, (response) => {
-                            if (chrome.runtime.lastError) {
-                                statusEl.textContent = '⚠️ Сервер ответил, но расширение не уловило. Закройте вкладку.';
-                            } else {
-                                statusEl.textContent = '🎉 Готово! Можете закрывать вкладку.';
-                                statusEl.style.color = '#34d399';
-                                setTimeout(() => window.close(), 1500);
-                            }
-                        });
-                    } catch (sendMessageError) {
-                        statusEl.textContent = '⚠️ Не удалось отправить сообщение в расширение. Проверьте externally_connectable в manifest.json';
-                        statusEl.style.color = '#fbbf24';
-                    }
-                }).catch((error) => {
-                    statusEl.textContent = '❌ Ошибка входа Google: ' + error.message;
-                    statusEl.style.color = '#f87171';
-                });
+                signInWithPopup(auth, provider)
+                    .then((result) => {
+                        const credential = GoogleAuthProvider.credentialFromResult(result);
+                        
+                        statusEl.innerHTML = '✅ Авторизация успешна! Отправка ключа...';
+                        statusEl.style.color = '#34d399';
+                        statusEl.style.background = 'transparent';
+                        
+                        try {
+                            chrome.runtime.sendMessage(extId, {
+                                type: "AUTH_SUCCESS",
+                                idToken: credential.idToken,
+                                accessToken: credential.accessToken
+                            }, (response) => {
+                                if (chrome.runtime.lastError) {
+                                    statusEl.innerHTML = '⚠️ Расширение не уловило ответ. Закройте вкладку.';
+                                    statusEl.style.color = '#fbbf24';
+                                } else {
+                                    statusEl.innerHTML = '🎉 <b>Готово!</b> Можете закрывать вкладку.';
+                                    setTimeout(() => window.close(), 1500);
+                                }
+                            });
+                        } catch (sendMessageError) {
+                            statusEl.innerHTML = '⚠️ Не удалось отправить сообщение в расширение.';
+                            statusEl.style.color = '#fbbf24';
+                        }
+                    }).catch((error) => {
+                        btn.textContent = '🔑 Войти через Google';
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                        statusEl.innerHTML = '<br/>❌ Ошибка входа Google: ' + error.message;
+                        statusEl.style.color = '#f87171';
+                        statusEl.prepend(btn);
+                    });
+            };
         } catch (e) {
             statusEl.textContent = '❌ Критическая ошибка инициализации: ' + e.message;
             statusEl.style.color = '#f87171';
