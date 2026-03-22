@@ -2,45 +2,30 @@
 // Запуск: node scripts/generate-icons.mjs
 
 import sharp from "sharp";
-import { mkdirSync } from "fs";
+import { mkdirSync, existsSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.join(__dirname, "..", "public", "icons");
+const publicDir = path.join(__dirname, "..", "public");
+const outDir = path.join(publicDir, "icons");
+const sourceSvg = path.join(publicDir, "favicon.svg");
+
 mkdirSync(outDir, { recursive: true });
 
-function makeSVG(size) {
-  const r = Math.round(size * 0.22);
-  const fontSize = Math.round(size * 0.54);
-  const cy = Math.round(size / 2 + fontSize * 0.36);
-  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#4338ca"/>
-    </linearGradient>
-  </defs>
-  <rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#g)"/>
-  <text
-    x="${size / 2}"
-    y="${cy}"
-    font-family="Arial Black, Arial, Helvetica, sans-serif"
-    font-weight="900"
-    font-size="${fontSize}"
-    fill="white"
-    text-anchor="middle"
-  >Z</text>
-</svg>`);
+if (!existsSync(sourceSvg)) {
+  console.error(`❌ Не найден файл ${sourceSvg}`);
+  process.exit(1);
 }
 
 for (const size of [16, 48, 128]) {
   const outPath = path.join(outDir, `icon${size}.png`);
-  await sharp(makeSVG(size), { density: 96 })
+  // Читаем SVG-файл и конвертируем его в нужный размер PNG
+  await sharp(sourceSvg, { density: 300 })
+    .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
-    .resize(size, size)
     .toFile(outPath);
   console.log(`✅ icon${size}.png → ${outPath}`);
 }
 
-console.log("\n🎉 Все иконки сгенерированы в public/icons/");
+console.log("\n🎉 Иконки расширения успешно сгенерированы из вашего favicon.svg!");
