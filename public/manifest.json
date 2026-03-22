@@ -21,7 +21,8 @@
     "https://*.firebaseio.com/*",
     "https://*.firebasestorage.googleapis.com/*",
     "https://identitytoolkit.googleapis.com/*",
-    "https://securetoken.googleapis.com/*"
+    "https://securetoken.googleapis.com/*",
+    "https://*.open-meteo.com/*"
   ],
   "externally_connectable": {
     "matches": [
@@ -29,6 +30,6 @@
     ]
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:;"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://geocoding-api.open-meteo.com https://api.open-meteo.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; media-src 'self' https: http:;"
   }
 }
